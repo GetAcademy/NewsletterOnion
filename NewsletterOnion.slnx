@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="NewsletterOnion.API/NewsletterOnion.API.csproj" />
+  <Project Path="NewsletterOnion.Core/NewsletterOnion.Core.csproj" />
+  <Project Path="NewsletterOnion.Test/NewsletterOnion.Test.csproj" />
+</Solution>
