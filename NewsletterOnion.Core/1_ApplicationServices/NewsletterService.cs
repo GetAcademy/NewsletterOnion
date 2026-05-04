@@ -46,6 +46,11 @@ namespace NewsletterOnion.Core._1_ApplicationServices
             return Result.Ok("Subscription created");
         }
 
+        public async Task<Result> VerifySubscriptionAsync()
+        {
+            return new Result(false, "kjh");
+        }
+
         private async Task SendVerificationEmail(string emailAddress, Subscription existing)
         {
             var verificationLink = $"<a href=\"https://my-app.getacademy.no/verify.html?code=${existing.Id}\"Verifiser!</a>";
