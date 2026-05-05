@@ -11,7 +11,7 @@ var storageDirectory = string.IsNullOrWhiteSpace(configuredStorageDirectory)
         ? configuredStorageDirectory
         : Path.Combine(builder.Environment.ContentRootPath, configuredStorageDirectory);
 
-var newsletterBaseUrl = builder.Configuration["Newsletter:BaseUrl"] ?? "http://localhost:5202";
+var newsletterBaseUrl = builder.Configuration["Newsletter:BaseUrl"] ?? "https://localhost:7271";
 
 builder.Services.AddSingleton<ISubscriptionRepository>(
     new JsonSubscriptionRepository(Path.Combine(storageDirectory, "subscriptions.json")));

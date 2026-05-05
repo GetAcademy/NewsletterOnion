@@ -10,7 +10,7 @@ namespace NewsletterOnion.Core._1_ApplicationServices
         private readonly string _baseUrl;
 
         public NewsletterService(
-            ISubscriptionRepository repo, IEmailSender emailSender, string baseUrl = "http://localhost:5202")
+            ISubscriptionRepository repo, IEmailSender emailSender, string baseUrl = "https://localhost:7271")
         {
             _repo = repo;
             _emailSender = emailSender;
