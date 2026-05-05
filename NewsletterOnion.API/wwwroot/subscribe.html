@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="no">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Nyhetsbrev</title>
+    <style>
+        :root {
+            color-scheme: light;
+            --bg: #f7f3ea;
+            --ink: #1f2a2e;
+            --muted: #5f6f73;
+            --line: #cdd8d2;
+            --accent: #1f7a5c;
+            --accent-strong: #15563f;
+            --panel: #ffffff;
+            --error: #a33434;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: grid;
+            place-items: center;
+            background:
+                radial-gradient(circle at 20% 10%, rgba(31, 122, 92, 0.14), transparent 28rem),
+                linear-gradient(135deg, #f7f3ea 0%, #edf5f0 100%);
+            color: var(--ink);
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+
+        main {
+            width: min(100% - 2rem, 34rem);
+            padding: 2rem;
+            background: var(--panel);
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            box-shadow: 0 1.25rem 3rem rgba(31, 42, 46, 0.12);
+        }
+
+        h1 {
+            margin: 0 0 0.5rem;
+            font-size: clamp(2rem, 8vw, 3.5rem);
+            line-height: 0.95;
+            letter-spacing: 0;
+        }
+
+        p {
+            margin: 0 0 1.5rem;
+            color: var(--muted);
+            line-height: 1.55;
+        }
+
+        form {
+            display: grid;
+            gap: 0.75rem;
+        }
+
+        label {
+            font-weight: 650;
+        }
+
+        .input-row {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: 0.75rem;
+        }
+
+        input,
+        button {
+            min-height: 3rem;
+            border-radius: 8px;
+            font: inherit;
+        }
+
+        input {
+            width: 100%;
+            border: 1px solid var(--line);
+            padding: 0 0.9rem;
+        }
+
+        input:focus {
+            border-color: var(--accent);
+            outline: 3px solid rgba(31, 122, 92, 0.18);
+        }
+
+        button {
+            border: 0;
+            padding: 0 1.2rem;
+            background: var(--accent);
+            color: white;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        button:hover,
+        button:focus-visible {
+            background: var(--accent-strong);
+        }
+
+        button:disabled {
+            cursor: progress;
+            opacity: 0.72;
+        }
+
+        .message {
+            min-height: 1.5rem;
+            margin-top: 1rem;
+            font-weight: 650;
+        }
+
+        .message.error {
+            color: var(--error);
+        }
+
+        .message.success {
+            color: var(--accent-strong);
+        }
+
+        @media (max-width: 34rem) {
+            main {
+                padding: 1.25rem;
+            }
+
+            .input-row {
+                grid-template-columns: 1fr;
+            }
+
+            button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <h1>Nyhetsbrev</h1>
+        <p>Sett opp abonnementet ditt, så legger vi verifiseringslenken i outbox-filen.</p>
+
+        <form id="subscribe-form">
+            <label for="email">E-post</label>
+            <div class="input-row">
+                <input id="email" name="email" type="email" autocomplete="email" required>
+                <button type="submit">Abonner</button>
+            </div>
+        </form>
+
+        <div id="message" class="message" role="status" aria-live="polite"></div>
+    </main>
+
+    <script>
+        const form = document.querySelector("#subscribe-form");
+        const email = document.querySelector("#email");
+        const button = form.querySelector("button");
+        const message = document.querySelector("#message");
+
+        form.addEventListener("submit", async (event) => {
+            event.preventDefault();
+            setMessage("", "");
+            button.disabled = true;
+
+            try {
+                const response = await fetch("/subscribe", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ email: email.value })
+                });
+                const data = await response.json();
+                setMessage(data.message, response.ok ? "success" : "error");
+            } catch {
+                setMessage("Kunne ikke kontakte API-et.", "error");
+            } finally {
+                button.disabled = false;
+            }
+        });
+
+        function setMessage(text, kind) {
+            message.textContent = text;
+            message.className = kind ? `message ${kind}` : "message";
+        }
+    </script>
+</body>
+</html>

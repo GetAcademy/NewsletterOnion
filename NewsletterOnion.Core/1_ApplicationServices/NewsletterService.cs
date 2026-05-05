@@ -7,12 +7,14 @@ namespace NewsletterOnion.Core._1_ApplicationServices
     {
         private readonly ISubscriptionRepository _repo;
         private readonly IEmailSender _emailSender;
+        private readonly string _baseUrl;
 
         public NewsletterService(
-            ISubscriptionRepository repo, IEmailSender emailSender)
+            ISubscriptionRepository repo, IEmailSender emailSender, string baseUrl = "http://localhost:5202")
         {
             _repo = repo;
             _emailSender = emailSender;
+            _baseUrl = baseUrl.TrimEnd('/');
         }
 
         public async Task<Result> SubscribeAsync(string emailAddress)
@@ -47,17 +49,32 @@ namespace NewsletterOnion.Core._1_ApplicationServices
             return Result.Ok("Subscription created");
         }
 
-        public async Task<Result> VerifySubscriptionAsync()
+        public async Task<Result> VerifySubscriptionAsync(Guid code)
         {
-            return new Result(false, "kjh");
+            var subscription = await _repo.GetByIdAsync(code);
+            if (subscription == null)
+            {
+                return Result.Fail("Verification code not found");
+            }
+
+            if (subscription.IsConfirmed)
+            {
+                return Result.Ok("Subscription already verified");
+            }
+
+            subscription.IsConfirmed = true;
+            await _repo.UpdateAsync(subscription);
+
+            return Result.Ok("Subscription verified");
         }
 
         private async Task SendVerificationEmail(string emailAddress, Subscription existing)
         {
-            var verificationLink = $"<a href=\"https://my-app.getacademy.no/verify.html?code=${existing.Id}\"Verifiser!</a>";
+            var verificationUrl = $"{_baseUrl}/verify.html?code={existing.Id}";
+            var verificationLink = $"<a href=\"{verificationUrl}\">Verifiser!</a>";
 
             var email = new Email(emailAddress, "my-app@getacademy.no", "Verifiser abonnement", 
-                $"Bla bla bla. ${verificationLink}");
+                $"Bla bla bla. {verificationLink}");
             await _emailSender.Send(email);
         }
     }

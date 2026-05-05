@@ -4,7 +4,7 @@ using NewsletterOnion.Core._3_DomainModel;
 
 namespace NewsletterOnion.Test
 {
-    public class NewsletterServiceTest
+    public class NewsletterServiceTestManualMock
     {
         [Test]
         public async Task TestInvalidEmail()
@@ -35,9 +35,20 @@ namespace NewsletterOnion.Test
                 return Task.FromResult(_subscription)!;
             }
 
+            public Task<Subscription?> GetByIdAsync(Guid id)
+            {
+                return Task.FromResult(_subscription)!;
+            }
+
             public Task AddAsync(Subscription subscription)
             {
                 SubscriptionAddedCount++;
+                return Task.CompletedTask;
+            }
+
+            public Task UpdateAsync(Subscription subscription)
+            {
+                _subscription = subscription;
                 return Task.CompletedTask;
             }
         }
