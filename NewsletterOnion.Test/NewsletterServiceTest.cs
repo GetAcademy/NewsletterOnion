@@ -22,22 +22,22 @@ namespace NewsletterOnion.Test
 
         class SubscriptionRepositoryMock : ISubscriptionRepository
         {
-            private bool _isConfirmed;
+            private Subscription _subscription;
+            public int SubscriptionAddedCount { get; private set; }
 
-            public SubscriptionRepositoryMock(bool isConfirmed)
+            public SubscriptionRepositoryMock(Subscription subscription)
             {
-                _isConfirmed = isConfirmed;
+                _subscription = subscription;
             }
 
             public Task<Subscription?> GetByEmailAsync(string email)
             {
-                var subscription = new Subscription();
-                subscription.IsConfirmed = _isConfirmed;
-                return Task.FromResult(subscription)!;
+                return Task.FromResult(_subscription)!;
             }
 
             public Task AddAsync(Subscription subscription)
             {
+                SubscriptionAddedCount++;
                 return Task.CompletedTask;
             }
         }
@@ -46,7 +46,7 @@ namespace NewsletterOnion.Test
         public async Task TestAlreadyRegistered()
         {
             // arrange
-            var mockRepo = new SubscriptionRepositoryMock(true);
+            var mockRepo = new SubscriptionRepositoryMock(new Subscription{IsConfirmed = true});
             var service = new NewsletterService(mockRepo, null);
 
             // act
@@ -59,8 +59,11 @@ namespace NewsletterOnion.Test
 
         class EmailSenderMock : IEmailSender
         {
+            public int EmailSentCount { get; private set; }
+
             public Task Send(Email email)
             {
+                EmailSentCount++;
                 return Task.CompletedTask;
             }
         }
@@ -69,7 +72,7 @@ namespace NewsletterOnion.Test
         public async Task TestExistingUnconfirmed()
         {
             // arrange
-            var mockRepo = new SubscriptionRepositoryMock(false);
+            var mockRepo = new SubscriptionRepositoryMock(new Subscription{IsConfirmed = false});
             var mockEmail = new EmailSenderMock();
             var service = new NewsletterService(mockRepo, mockEmail);
 
@@ -78,7 +81,26 @@ namespace NewsletterOnion.Test
 
             // assert
             Assert.That(result.IsSuccess);
+            Assert.That(mockEmail.EmailSentCount, Is.EqualTo(1));
             Assert.That(result.Message, Is.EqualTo("Confirmation email resent"));
+        }
+
+        [Test]
+        public async Task TestNewSubscription()
+        {
+            // arrange
+            var mockRepo = new SubscriptionRepositoryMock(null);
+            var mockEmail = new EmailSenderMock();
+            var service = new NewsletterService(mockRepo, mockEmail);
+
+            // act
+            var result = await service.SubscribeAsync("terje@getacademy.no");
+
+            // assert
+            Assert.That(result.IsSuccess);
+            Assert.That(mockEmail.EmailSentCount, Is.EqualTo(1));
+            Assert.That(mockRepo.SubscriptionAddedCount, Is.EqualTo(1));
+            Assert.That(result.Message, Is.EqualTo("Subscription created"));
         }
     }
 }
