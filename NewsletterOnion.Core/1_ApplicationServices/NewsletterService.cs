@@ -8,7 +8,8 @@ namespace NewsletterOnion.Core._1_ApplicationServices
         private readonly ISubscriptionRepository _repo;
         private readonly IEmailSender _emailSender;
 
-        public NewsletterService(ISubscriptionRepository repo, IEmailSender emailSender)
+        public NewsletterService(
+            ISubscriptionRepository repo, IEmailSender emailSender)
         {
             _repo = repo;
             _emailSender = emailSender;
