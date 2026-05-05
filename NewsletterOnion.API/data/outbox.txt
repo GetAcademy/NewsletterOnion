@@ -1,0 +1,7 @@
+SentAt: 2026-05-05T10:04:58.2294608+02:00
+From: my-app@getacademy.no
+To: terje@kolderup.net
+Subject: Verifiser abonnement
+Body:
+Bla bla bla. <a href="http://localhost:5202/verify.html?code=5a03a931-8cc7-4660-bf19-75f78a894917">Verifiser!</a>
+------------------------------------------------------------------------
